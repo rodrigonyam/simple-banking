@@ -195,18 +195,17 @@ function Dashboard() {
                 </div>
               </div>
             ))}
-          </div>
-        </div>
 
-          {recentTransactions.length === 0 && (
-            <div className="text-center py-12">
-              <div className="bg-gray-100 rounded-full p-6 w-24 h-24 mx-auto mb-4">
-                <BarChart3 size={48} className="text-gray-400" />
+            {recentTransactions.length === 0 && (
+              <div className="text-center py-12">
+                <div className="bg-gray-100 rounded-full p-6 w-24 h-24 mx-auto mb-4">
+                  <BarChart3 size={48} className="text-gray-400" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-600 mb-2">No recent activity</h3>
+                <p className="text-gray-500">Your transactions will appear here</p>
               </div>
-              <h3 className="text-xl font-semibold text-gray-600 mb-2">No recent activity</h3>
-              <p className="text-gray-500">Your transactions will appear here</p>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>
