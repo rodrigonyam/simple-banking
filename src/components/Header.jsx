@@ -1,7 +1,7 @@
 import React from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../App'
-import { User, LogOut, CreditCard, ArrowLeftRight, BarChart3 } from 'lucide-react'
+import { User, LogOut, CreditCard, ArrowLeftRight, BarChart3, PlusCircle, MinusCircle } from 'lucide-react'
 
 function Header() {
   const { isAuthenticated, user, logout } = useAuth()
@@ -31,15 +31,27 @@ function Header() {
                   </Link>
                 </li>
                 <li>
-                  <Link to="/transactions" className="nav-link flex items-center gap-2">
-                    <BarChart3 size={18} />
-                    Transactions
+                  <Link to="/deposit" className="nav-link flex items-center gap-2">
+                    <PlusCircle size={18} />
+                    Deposit
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/withdrawal" className="nav-link flex items-center gap-2">
+                    <MinusCircle size={18} />
+                    Withdrawal
                   </Link>
                 </li>
                 <li>
                   <Link to="/transfer" className="nav-link flex items-center gap-2">
                     <ArrowLeftRight size={18} />
                     Transfer
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/transactions" className="nav-link flex items-center gap-2">
+                    <BarChart3 size={18} />
+                    History
                   </Link>
                 </li>
               </ul>

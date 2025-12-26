@@ -1,6 +1,6 @@
 import React from 'react'
 import { useAuth } from '../App'
-import { CreditCard, TrendingUp, ArrowUpRight, ArrowDownLeft, Eye } from 'lucide-react'
+import { CreditCard, TrendingUp, ArrowUpRight, ArrowDownLeft, Eye, PlusCircle, MinusCircle, ArrowLeftRight } from 'lucide-react'
 
 function Dashboard() {
   const { user } = useAuth()
@@ -34,14 +34,24 @@ function Dashboard() {
 
         <div className="card">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Quick Actions</h2>
+            <h2 className="text-xl font-semibold text-gray-900">Core Banking Operations</h2>
           </div>
-          <div className="space-y-3">
-            <a href="/transfer" className="btn btn-primary w-full">
-              Transfer Money
+          <div className="grid grid-2 gap-4">
+            <a href="/deposit" className="btn btn-primary w-full">
+              <PlusCircle size={18} className="mr-2" />
+              Deposit Money
+            </a>
+            <a href="/withdrawal" className="btn btn-secondary w-full">
+              <MinusCircle size={18} className="mr-2" />
+              Withdraw Money
+            </a>
+            <a href="/transfer" className="btn btn-outline w-full">
+              <ArrowLeftRight size={18} className="mr-2" />
+              Transfer Funds
             </a>
             <a href="/transactions" className="btn btn-outline w-full">
-              View All Transactions
+              <Eye size={18} className="mr-2" />
+              View History
             </a>
           </div>
         </div>

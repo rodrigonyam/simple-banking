@@ -5,6 +5,8 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Transactions from './pages/Transactions'
 import Transfer from './pages/Transfer'
+import Deposit from './pages/Deposit'
+import Withdrawal from './pages/Withdrawal'
 
 // Auth Context
 const AuthContext = createContext()
@@ -21,7 +23,8 @@ export const useAuth = () => {
 const mockUser = {
   id: 1,
   name: 'John Doe',
-  email: 'john.doe@email.com',
+  accountNumber: '1234567890',
+  pin: '1234',
   accounts: [
     {
       id: 'acc1',
@@ -84,14 +87,14 @@ function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
 
-  const login = (email, password) => {
-    // Simple mock authentication
-    if (email === 'demo@bank.com' && password === 'demo123') {
+  const login = (accountNumber, pin) => {
+    // PIN-based authentication
+    if (accountNumber === '1234567890' && pin === '1234') {
       setUser(mockUser)
       setIsAuthenticated(true)
       return { success: true }
     }
-    return { success: false, error: 'Invalid credentials' }
+    return { success: false, error: 'Invalid account number or PIN' }
   }
 
   const logout = () => {
@@ -140,6 +143,16 @@ function App() {
               <Route path="/transfer" element={
                 <ProtectedRoute>
                   <Transfer />
+                </ProtectedRoute>
+              } />
+              <Route path="/deposit" element={
+                <ProtectedRoute>
+                  <Deposit />
+                </ProtectedRoute>
+              } />
+              <Route path="/withdrawal" element={
+                <ProtectedRoute>
+                  <Withdrawal />
                 </ProtectedRoute>
               } />
               <Route path="/" element={<Navigate to="/dashboard" />} />
