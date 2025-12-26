@@ -91,7 +91,6 @@ function Dashboard() {
             </a>
           </div>
         </div>
-      </div>
 
         {/* Account Details */}
         <div className="grid md:grid-cols-2 gap-8 mb-8">
