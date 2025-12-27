@@ -32,10 +32,7 @@ function Login() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Hero Section */}
       <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800">
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-600/90 to-purple-600/90"></div>
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.1"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20"></div>
-        </div>
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600"></div>
         <div className="relative container mx-auto px-6 py-16">
           <div className="text-center text-white">
             <div className="flex justify-center mb-6">
@@ -91,7 +88,7 @@ function Login() {
                 <p className="text-gray-600">Enter your credentials to access your account</p>
               </div>
 
-<div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl p-6 mb-6">
+              <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl p-6 mb-6">
                 <div className="flex items-center mb-3">
                   <div className="bg-blue-500 rounded-full p-2 mr-3">
                     <CreditCard size={16} className="text-white" />
@@ -108,18 +105,18 @@ function Login() {
                     <code className="bg-blue-100 text-blue-800 px-3 py-1 rounded-lg font-mono text-sm">1234</code>
                   </div>
                 </div>
-          </div>
-
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded p-4 mb-4">
-              <div className="flex items-center">
-                <AlertCircle className="text-red-500 mr-2" size={20} />
-                <span className="text-red-700">{error}</span>
               </div>
-            </div>
-          )}
 
-<form onSubmit={handleSubmit} className="space-y-6">
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded p-4 mb-4">
+                  <div className="flex items-center">
+                    <AlertCircle className="text-red-500 mr-2" size={20} />
+                    <span className="text-red-700">{error}</span>
+                  </div>
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="form-group">
                   <label htmlFor="accountNumber" className="form-label text-gray-700 font-semibold">
                     <CreditCard size={18} className="inline mr-2 text-blue-600" />
@@ -171,13 +168,15 @@ function Login() {
                       Access My Account
                     </div>
                   )}
-            </button>
-          </form>
+                </button>
+              </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
-              Secure banking with 256-bit SSL encryption
-            </p>
+              <div className="mt-6 text-center">
+                <p className="text-sm text-gray-600">
+                  Secure banking with 256-bit SSL encryption
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
