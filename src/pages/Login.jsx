@@ -8,7 +8,7 @@ function Login() {
   const [pin, setPin] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  
+
   const { login } = useAuth()
   const navigate = useNavigate()
 
@@ -18,13 +18,13 @@ function Login() {
     setIsLoading(true)
 
     const result = login(accountNumber, pin)
-    
+
     if (result.success) {
       navigate('/dashboard')
     } else {
       setError(result.error)
     }
-    
+
     setIsLoading(false)
   }
 
@@ -36,7 +36,7 @@ function Login() {
         <div className="relative container mx-auto px-6 py-16">
           <div className="text-center text-white">
             <div className="flex justify-center mb-6">
-              <div className="bg-white/20 backdrop-blur-sm rounded-full p-6">
+              <div className="bg-white-20 backdrop-blur-sm rounded-full p-6">
                 <CreditCard size={48} className="text-white" />
               </div>
             </div>
@@ -48,21 +48,21 @@ function Login() {
             </p>
             <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
               <div className="text-center">
-                <div className="bg-white/10 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                <div className="bg-white-10 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                   <Lock size={32} className="text-blue-200" />
                 </div>
                 <h3 className="font-semibold text-lg mb-2">Secure Banking</h3>
                 <p className="text-blue-200 text-sm">Bank-grade security with PIN protection</p>
               </div>
               <div className="text-center">
-                <div className="bg-white/10 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                <div className="bg-white-10 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                   <Hash size={32} className="text-purple-200" />
                 </div>
                 <h3 className="font-semibold text-lg mb-2">Instant Access</h3>
                 <p className="text-blue-200 text-sm">Quick PIN-based authentication</p>
               </div>
               <div className="text-center">
-                <div className="bg-white/10 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                <div className="bg-white-10 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                   <CreditCard size={32} className="text-green-200" />
                 </div>
                 <h3 className="font-semibold text-lg mb-2">Full Banking</h3>
@@ -155,7 +155,7 @@ function Login() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-102 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed border-none"
                 >
                   {isLoading ? (
                     <div className="flex items-center justify-center">
