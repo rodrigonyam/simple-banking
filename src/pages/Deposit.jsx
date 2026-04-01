@@ -1,81 +1,95 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../App'
-import { PlusCircle, DollarSign, AlertCircle, CheckCircle, CreditCard } from 'lucide-react'
+import { useToast } from '../components/Toast'
+import ConfirmModal from '../components/ConfirmModal'
+import { PlusCircle, DollarSign, AlertCircle, CreditCard } from 'lucide-react'
+
+const QUICK_AMOUNTS = [50, 100, 500, 1000]
+const CONFIRM_THRESHOLD = 200
 
 function Deposit() {
   const { user, deposit } = useAuth()
+  const { showToast } = useToast()
+  const navigate = useNavigate()
   const [selectedAccount, setSelectedAccount] = useState('')
   const [amount, setAmount] = useState('')
   const [description, setDescription] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
+  const [showConfirm, setShowConfirm] = useState(false)
 
   const accounts = user?.accounts || []
+
+  const getRawAmount = () => parseFloat(amount.replace(/,/g, '')) || 0
+
+  const handleAmountChange = (e) => {
+    let raw = e.target.value.replace(/,/g, '').replace(/[^0-9.]/g, '')
+    if (raw === '') { setAmount(''); return }
+    const dotIndex = raw.indexOf('.')
+    if (dotIndex !== -1) {
+      raw = raw.slice(0, dotIndex + 1) + raw.slice(dotIndex + 1).replace(/\./g, '')
+      raw = raw.slice(0, dotIndex + 3)
+    }
+    const [intPart, decPart] = raw.split('.')
+    const intNum = parseInt(intPart)
+    const formattedInt = isNaN(intNum) ? '0' : intNum.toLocaleString('en-US')
+    setAmount(decPart !== undefined ? `${formattedInt}.${decPart}` : formattedInt)
+  }
+
+  const setQuickAmount = (val) => setAmount(val.toLocaleString('en-US'))
 
   const handleSubmit = (e) => {
     e.preventDefault()
     setError('')
-    setSuccess(false)
+    const depositAmount = getRawAmount()
+    if (!selectedAccount || !amount) { setError('Please fill in all required fields'); return }
+    if (isNaN(depositAmount) || depositAmount <= 0) { setError('Please enter a valid amount greater than 0'); return }
+    if (depositAmount > 10000) { setError('Daily deposit limit is $10,000'); return }
+    if (depositAmount >= CONFIRM_THRESHOLD) { setShowConfirm(true); return }
+    processDeposit(depositAmount)
+  }
+
+  const processDeposit = (depositAmount) => {
     setIsLoading(true)
-
-    // Validation
-    if (!selectedAccount || !amount) {
-      setError('Please fill in all required fields')
-      setIsLoading(false)
-      return
-    }
-
-    const depositAmount = parseFloat(amount)
-    if (isNaN(depositAmount) || depositAmount <= 0) {
-      setError('Please enter a valid amount greater than 0')
-      setIsLoading(false)
-      return
-    }
-
-    if (depositAmount > 10000) {
-      setError('Daily deposit limit is $10,000')
-      setIsLoading(false)
-      return
-    }
-
-    // Simulate deposit processing
     setTimeout(() => {
       deposit(selectedAccount, depositAmount, description)
-      setSuccess(true)
       setIsLoading(false)
-      
-      // Reset form
-      setSelectedAccount('')
-      setAmount('')
-      setDescription('')
-    }, 2000)
+      showToast({ message: `Deposit of $${depositAmount.toFixed(2)} successful!`, type: 'success' })
+      setSelectedAccount(''); setAmount(''); setDescription('')
+      setTimeout(() => navigate('/dashboard'), 1500)
+    }, 1000)
   }
 
-  const getAccountDisplay = (account) => {
-    return `${account.type} (${account.accountNumber}) - $${account.balance.toFixed(2)}`
-  }
+  const handleConfirm = () => { setShowConfirm(false); processDeposit(getRawAmount()) }
+
+  const getAccountDisplay = (account) => `${account.type} (${account.accountNumber}) - $${account.balance.toFixed(2)}`
+
+  const depositAmount = getRawAmount()
 
   return (
     <div className="py-8">
+      <ConfirmModal
+        isOpen={showConfirm}
+        title="Confirm Large Deposit"
+        message="You are about to make a large deposit. Please review the details below."
+        details={[
+          { label: 'To Account', value: (accounts.find(a => a.id === selectedAccount)?.type || '') + ' Account' },
+          { label: 'Amount', value: `$${depositAmount.toFixed(2)}` },
+          ...(description ? [{ label: 'Description', value: description }] : []),
+        ]}
+        confirmLabel="Confirm Deposit"
+        confirmClass="bg-green-600 hover:bg-green-700 text-white"
+        onConfirm={handleConfirm}
+        onCancel={() => setShowConfirm(false)}
+      />
+
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Deposit Money</h1>
         <p className="text-gray-600">Add funds to your account securely</p>
       </div>
 
       <div className="max-w-2xl mx-auto">
-        {success && (
-          <div className="card bg-green-50 border border-green-200 mb-6">
-            <div className="flex items-center">
-              <CheckCircle className="text-green-500 mr-3" size={24} />
-              <div>
-                <h3 className="text-lg font-semibold text-green-800">Deposit Successful!</h3>
-                <p className="text-green-700">Your deposit has been processed successfully.</p>
-              </div>
-            </div>
-          </div>
-        )}
-
         <div className="card">
           <div className="text-center mb-8">
             <div className="bg-green-100 rounded-full p-4 w-16 h-16 mx-auto mb-4">
@@ -109,37 +123,47 @@ function Deposit() {
               >
                 <option value="">Select account to deposit into</option>
                 {accounts.map(account => (
-                  <option key={account.id} value={account.id}>
-                    {getAccountDisplay(account)}
-                  </option>
+                  <option key={account.id} value={account.id}>{getAccountDisplay(account)}</option>
                 ))}
               </select>
             </div>
 
-            <div className="form-group mb-6">
+            <div className="form-group mb-2">
               <label htmlFor="amount" className="form-label">
                 <DollarSign size={18} className="inline mr-2" />
                 Deposit Amount
               </label>
-              <input
-                id="amount"
-                type="number"
-                step="0.01"
-                min="0.01"
-                max="10000"
-                className="form-input"
-                placeholder="0.00"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                required
-              />
-              <p className="text-sm text-gray-600 mt-2">Daily limit: $10,000</p>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">$</span>
+                <input
+                  id="amount"
+                  type="text"
+                  inputMode="decimal"
+                  className="form-input pl-7"
+                  placeholder="0.00"
+                  value={amount}
+                  onChange={handleAmountChange}
+                  required
+                />
+              </div>
+              <p className="text-sm text-gray-500 mt-1">Daily limit: $10,000</p>
+            </div>
+
+            <div className="flex flex-wrap gap-2 mb-6">
+              {QUICK_AMOUNTS.map(val => (
+                <button
+                  key={val}
+                  type="button"
+                  onClick={() => setQuickAmount(val)}
+                  className="px-3 py-1.5 text-sm font-medium bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100 transition-colors"
+                >
+                  ${val.toLocaleString('en-US')}
+                </button>
+              ))}
             </div>
 
             <div className="form-group mb-6">
-              <label htmlFor="description" className="form-label">
-                Description (Optional)
-              </label>
+              <label htmlFor="description" className="form-label">Description (Optional)</label>
               <input
                 id="description"
                 type="text"
@@ -150,22 +174,17 @@ function Deposit() {
               />
             </div>
 
-            {/* Deposit Preview */}
             {selectedAccount && amount && (
               <div className="bg-gray-50 rounded-lg p-6 mb-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Deposit Summary</h3>
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-gray-600">To Account:</span>
-                    <span className="font-medium">
-                      {accounts.find(acc => acc.id === selectedAccount)?.type} Account
-                    </span>
+                    <span className="font-medium">{accounts.find(acc => acc.id === selectedAccount)?.type} Account</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Deposit Amount:</span>
-                    <span className="text-xl font-bold text-green-600">
-                      ${parseFloat(amount || 0).toFixed(2)}
-                    </span>
+                    <span className="text-xl font-bold text-green-600">${depositAmount.toFixed(2)}</span>
                   </div>
                   {description && (
                     <div className="flex justify-between">
@@ -185,12 +204,12 @@ function Deposit() {
               {isLoading ? (
                 <div className="flex items-center justify-center">
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                  Processing Deposit...
+                  Processing...
                 </div>
               ) : (
                 <div className="flex items-center justify-center">
                   <PlusCircle size={20} className="mr-2" />
-                  Deposit ${parseFloat(amount || 0).toFixed(2)}
+                  Deposit {amount ? `$${depositAmount.toFixed(2)}` : ''}
                 </div>
               )}
             </button>

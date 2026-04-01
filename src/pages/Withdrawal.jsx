@@ -1,88 +1,99 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../App'
-import { MinusCircle, DollarSign, AlertCircle, CheckCircle, CreditCard } from 'lucide-react'
+import { useToast } from '../components/Toast'
+import ConfirmModal from '../components/ConfirmModal'
+import { MinusCircle, DollarSign, AlertCircle, CreditCard } from 'lucide-react'
+
+const QUICK_AMOUNTS = [20, 50, 100, 200]
+const CONFIRM_THRESHOLD = 100
 
 function Withdrawal() {
   const { user, withdraw } = useAuth()
+  const { showToast } = useToast()
+  const navigate = useNavigate()
   const [selectedAccount, setSelectedAccount] = useState('')
   const [amount, setAmount] = useState('')
   const [description, setDescription] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
+  const [showConfirm, setShowConfirm] = useState(false)
 
   const accounts = user?.accounts || []
+
+  const getRawAmount = () => parseFloat(amount.replace(/,/g, '')) || 0
+
+  const handleAmountChange = (e) => {
+    let raw = e.target.value.replace(/,/g, '').replace(/[^0-9.]/g, '')
+    if (raw === '') { setAmount(''); return }
+    const dotIndex = raw.indexOf('.')
+    if (dotIndex !== -1) {
+      raw = raw.slice(0, dotIndex + 1) + raw.slice(dotIndex + 1).replace(/\./g, '')
+      raw = raw.slice(0, dotIndex + 3)
+    }
+    const [intPart, decPart] = raw.split('.')
+    const intNum = parseInt(intPart)
+    const formattedInt = isNaN(intNum) ? '0' : intNum.toLocaleString('en-US')
+    setAmount(decPart !== undefined ? `${formattedInt}.${decPart}` : formattedInt)
+  }
+
+  const setQuickAmount = (val) => setAmount(val.toLocaleString('en-US'))
 
   const handleSubmit = (e) => {
     e.preventDefault()
     setError('')
-    setSuccess(false)
-    setIsLoading(true)
-
-    // Validation
-    if (!selectedAccount || !amount) {
-      setError('Please fill in all required fields')
-      setIsLoading(false)
-      return
-    }
-
-    const withdrawAmount = parseFloat(amount)
-    if (isNaN(withdrawAmount) || withdrawAmount <= 0) {
-      setError('Please enter a valid amount greater than 0')
-      setIsLoading(false)
-      return
-    }
-
-    if (withdrawAmount > 500) {
-      setError('Daily withdrawal limit is $500')
-      setIsLoading(false)
-      return
-    }
-
+    const withdrawAmount = getRawAmount()
+    if (!selectedAccount || !amount) { setError('Please fill in all required fields'); return }
+    if (isNaN(withdrawAmount) || withdrawAmount <= 0) { setError('Please enter a valid amount greater than 0'); return }
+    if (withdrawAmount > 500) { setError('Daily withdrawal limit is $500'); return }
     const sourceAccount = accounts.find(acc => acc.id === selectedAccount)
-    if (sourceAccount && withdrawAmount > sourceAccount.balance) {
-      setError('Insufficient funds in the selected account')
-      setIsLoading(false)
-      return
-    }
+    if (sourceAccount && withdrawAmount > sourceAccount.balance) { setError('Insufficient funds in the selected account'); return }
+    if (withdrawAmount >= CONFIRM_THRESHOLD) { setShowConfirm(true); return }
+    processWithdrawal(withdrawAmount)
+  }
 
-    // Simulate withdrawal processing
+  const processWithdrawal = (withdrawAmount) => {
+    setIsLoading(true)
     setTimeout(() => {
       withdraw(selectedAccount, withdrawAmount, description)
-      setSuccess(true)
       setIsLoading(false)
-      
-      // Reset form
-      setSelectedAccount('')
-      setAmount('')
-      setDescription('')
-    }, 2000)
+      showToast({ message: `Withdrawal of $${withdrawAmount.toFixed(2)} successful!`, type: 'success' })
+      setSelectedAccount(''); setAmount(''); setDescription('')
+      setTimeout(() => navigate('/dashboard'), 1500)
+    }, 1000)
   }
 
-  const getAccountDisplay = (account) => {
-    return `${account.type} (${account.accountNumber}) - $${account.balance.toFixed(2)}`
-  }
+  const handleConfirm = () => { setShowConfirm(false); processWithdrawal(getRawAmount()) }
+
+  const getAccountDisplay = (account) => `${account.type} (${account.accountNumber}) - $${account.balance.toFixed(2)}`
+
+  const withdrawAmount = getRawAmount()
+  const sourceAccount = accounts.find(acc => acc.id === selectedAccount)
 
   return (
     <div className="py-8">
+      <ConfirmModal
+        isOpen={showConfirm}
+        title="Confirm Withdrawal"
+        message="You are about to make a withdrawal. Please review the details below."
+        details={[
+          { label: 'From Account', value: (sourceAccount?.type || '') + ' Account' },
+          { label: 'Amount', value: `$${withdrawAmount.toFixed(2)}` },
+          { label: 'Remaining Balance', value: `$${((sourceAccount?.balance || 0) - withdrawAmount).toFixed(2)}` },
+          ...(description ? [{ label: 'Description', value: description }] : []),
+        ]}
+        confirmLabel="Confirm Withdrawal"
+        confirmClass="bg-red-600 hover:bg-red-700 text-white"
+        onConfirm={handleConfirm}
+        onCancel={() => setShowConfirm(false)}
+      />
+
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Withdraw Money</h1>
         <p className="text-gray-600">Withdraw cash from your account</p>
       </div>
 
       <div className="max-w-2xl mx-auto">
-        {success && (
-          <div className="card bg-green-50 border border-green-200 mb-6">
-            <div className="flex items-center">
-              <CheckCircle className="text-green-500 mr-3" size={24} />
-              <div>
-                <h3 className="text-lg font-semibold text-green-800">Withdrawal Successful!</h3>
-                <p className="text-green-700">Your withdrawal has been processed successfully.</p>
-              </div>
-            </div>
-          </div>
-        )}
-
         <div className="card">
           <div className="text-center mb-8">
             <div className="bg-red-100 rounded-full p-4 w-16 h-16 mx-auto mb-4">
@@ -116,37 +127,47 @@ function Withdrawal() {
               >
                 <option value="">Select account to withdraw from</option>
                 {accounts.map(account => (
-                  <option key={account.id} value={account.id}>
-                    {getAccountDisplay(account)}
-                  </option>
+                  <option key={account.id} value={account.id}>{getAccountDisplay(account)}</option>
                 ))}
               </select>
             </div>
 
-            <div className="form-group mb-6">
+            <div className="form-group mb-2">
               <label htmlFor="amount" className="form-label">
                 <DollarSign size={18} className="inline mr-2" />
                 Withdrawal Amount
               </label>
-              <input
-                id="amount"
-                type="number"
-                step="0.01"
-                min="0.01"
-                max="500"
-                className="form-input"
-                placeholder="0.00"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                required
-              />
-              <p className="text-sm text-gray-600 mt-2">Daily limit: $500</p>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">$</span>
+                <input
+                  id="amount"
+                  type="text"
+                  inputMode="decimal"
+                  className="form-input pl-7"
+                  placeholder="0.00"
+                  value={amount}
+                  onChange={handleAmountChange}
+                  required
+                />
+              </div>
+              <p className="text-sm text-gray-500 mt-1">Daily limit: $500</p>
+            </div>
+
+            <div className="flex flex-wrap gap-2 mb-6">
+              {QUICK_AMOUNTS.map(val => (
+                <button
+                  key={val}
+                  type="button"
+                  onClick={() => setQuickAmount(val)}
+                  className="px-3 py-1.5 text-sm font-medium bg-red-50 text-red-700 border border-red-200 rounded-lg hover:bg-red-100 transition-colors"
+                >
+                  ${val.toLocaleString('en-US')}
+                </button>
+              ))}
             </div>
 
             <div className="form-group mb-6">
-              <label htmlFor="description" className="form-label">
-                Description (Optional)
-              </label>
+              <label htmlFor="description" className="form-label">Description (Optional)</label>
               <input
                 id="description"
                 type="text"
@@ -157,33 +178,26 @@ function Withdrawal() {
               />
             </div>
 
-            {/* Withdrawal Preview */}
             {selectedAccount && amount && (
               <div className="bg-gray-50 rounded-lg p-6 mb-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Withdrawal Summary</h3>
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-gray-600">From Account:</span>
-                    <span className="font-medium">
-                      {accounts.find(acc => acc.id === selectedAccount)?.type} Account
-                    </span>
+                    <span className="font-medium">{sourceAccount?.type} Account</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Current Balance:</span>
-                    <span className="font-medium">
-                      ${accounts.find(acc => acc.id === selectedAccount)?.balance.toFixed(2)}
-                    </span>
+                    <span className="font-medium">${sourceAccount?.balance.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Withdrawal Amount:</span>
-                    <span className="text-xl font-bold text-red-600">
-                      -${parseFloat(amount || 0).toFixed(2)}
-                    </span>
+                    <span className="text-xl font-bold text-red-600">-${withdrawAmount.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between border-t pt-3">
                     <span className="text-gray-600 font-semibold">New Balance:</span>
                     <span className="text-xl font-bold text-blue-600">
-                      ${(accounts.find(acc => acc.id === selectedAccount)?.balance - parseFloat(amount || 0)).toFixed(2)}
+                      ${((sourceAccount?.balance || 0) - withdrawAmount).toFixed(2)}
                     </span>
                   </div>
                   {description && (
@@ -204,12 +218,12 @@ function Withdrawal() {
               {isLoading ? (
                 <div className="flex items-center justify-center">
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                  Processing Withdrawal...
+                  Processing...
                 </div>
               ) : (
                 <div className="flex items-center justify-center">
                   <MinusCircle size={20} className="mr-2" />
-                  Withdraw ${parseFloat(amount || 0).toFixed(2)}
+                  Withdraw {amount ? `$${withdrawAmount.toFixed(2)}` : ''}
                 </div>
               )}
             </button>
@@ -221,8 +235,7 @@ function Withdrawal() {
               <div>
                 <h4 className="font-semibold text-yellow-800 mb-1">Important Notice</h4>
                 <p className="text-yellow-700 text-sm">
-                  Please ensure you have sufficient funds before making a withdrawal. 
-                  This is a demo application - no real money will be withdrawn.
+                  This is a demo application — no real money will be withdrawn.
                 </p>
               </div>
             </div>
