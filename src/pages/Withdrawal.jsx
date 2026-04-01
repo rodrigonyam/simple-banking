@@ -3,7 +3,7 @@ import { useAuth } from '../App'
 import { MinusCircle, DollarSign, AlertCircle, CheckCircle, CreditCard } from 'lucide-react'
 
 function Withdrawal() {
-  const { user } = useAuth()
+  const { user, withdraw } = useAuth()
   const [selectedAccount, setSelectedAccount] = useState('')
   const [amount, setAmount] = useState('')
   const [description, setDescription] = useState('')
@@ -13,7 +13,7 @@ function Withdrawal() {
 
   const accounts = user?.accounts || []
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault()
     setError('')
     setSuccess(false)
@@ -33,6 +33,12 @@ function Withdrawal() {
       return
     }
 
+    if (withdrawAmount > 500) {
+      setError('Daily withdrawal limit is $500')
+      setIsLoading(false)
+      return
+    }
+
     const sourceAccount = accounts.find(acc => acc.id === selectedAccount)
     if (sourceAccount && withdrawAmount > sourceAccount.balance) {
       setError('Insufficient funds in the selected account')
@@ -40,14 +46,9 @@ function Withdrawal() {
       return
     }
 
-    if (withdrawAmount > 500) {
-      setError('Daily withdrawal limit is $500')
-      setIsLoading(false)
-      return
-    }
-
     // Simulate withdrawal processing
     setTimeout(() => {
+      withdraw(selectedAccount, withdrawAmount, description)
       setSuccess(true)
       setIsLoading(false)
       

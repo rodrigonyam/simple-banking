@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../App'
 import { CreditCard, TrendingUp, ArrowUpRight, ArrowDownLeft, Eye, PlusCircle, MinusCircle, ArrowLeftRight } from 'lucide-react'
 
@@ -53,7 +54,7 @@ function Dashboard() {
             <p className="text-gray-600 text-lg">Quick access to all your banking needs</p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <a href="/deposit" className="group">
+            <Link to="/deposit" className="group">
               <div className="bg-gradient-to-br from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-2xl p-6 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl">
                 <div className="text-center">
                   <PlusCircle size={32} className="mx-auto mb-3" />
@@ -61,8 +62,8 @@ function Dashboard() {
                   <p className="text-green-100 text-sm mt-1">Add funds</p>
                 </div>
               </div>
-            </a>
-            <a href="/withdrawal" className="group">
+            </Link>
+            <Link to="/withdrawal" className="group">
               <div className="bg-gradient-to-br from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white rounded-2xl p-6 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl">
                 <div className="text-center">
                   <MinusCircle size={32} className="mx-auto mb-3" />
@@ -70,8 +71,8 @@ function Dashboard() {
                   <p className="text-red-100 text-sm mt-1">Get cash</p>
                 </div>
               </div>
-            </a>
-            <a href="/transfer" className="group">
+            </Link>
+            <Link to="/transfer" className="group">
               <div className="bg-gradient-to-br from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-2xl p-6 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl">
                 <div className="text-center">
                   <ArrowLeftRight size={32} className="mx-auto mb-3" />
@@ -79,8 +80,8 @@ function Dashboard() {
                   <p className="text-blue-100 text-sm mt-1">Move funds</p>
                 </div>
               </div>
-            </a>
-            <a href="/transactions" className="group">
+            </Link>
+            <Link to="/transactions" className="group">
               <div className="bg-gradient-to-br from-purple-500 to-violet-600 hover:from-purple-600 hover:to-violet-700 text-white rounded-2xl p-6 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl">
                 <div className="text-center">
                   <Eye size={32} className="mx-auto mb-3" />
@@ -88,7 +89,7 @@ function Dashboard() {
                   <p className="text-purple-100 text-sm mt-1">View activity</p>
                 </div>
               </div>
-            </a>
+            </Link>
           </div>
         </div>
 
@@ -146,9 +147,9 @@ function Dashboard() {
               <h2 className="text-3xl font-bold text-gray-900 mb-2">Recent Activity</h2>
               <p className="text-gray-600">Your latest transactions</p>
             </div>
-            <a href="/transactions" className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg">
+            <Link to="/transactions" className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg">
               View All
-            </a>
+            </Link>
           </div>
 
           <div className="space-y-4">

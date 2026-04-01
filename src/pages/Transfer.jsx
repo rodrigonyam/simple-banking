@@ -3,7 +3,7 @@ import { useAuth } from '../App'
 import { ArrowRight, DollarSign, AlertCircle, CheckCircle, CreditCard } from 'lucide-react'
 
 function Transfer() {
-  const { user } = useAuth()
+  const { user, transfer } = useAuth()
   const [fromAccount, setFromAccount] = useState('')
   const [toAccount, setToAccount] = useState('')
   const [amount, setAmount] = useState('')
@@ -14,7 +14,7 @@ function Transfer() {
 
   const accounts = user?.accounts || []
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault()
     setError('')
     setSuccess(false)
@@ -49,6 +49,7 @@ function Transfer() {
 
     // Simulate transfer processing
     setTimeout(() => {
+      transfer(fromAccount, toAccount, transferAmount, description)
       setSuccess(true)
       setIsLoading(false)
       
@@ -138,7 +139,9 @@ function Transfer() {
                   required
                 >
                   <option value="">Select destination account</option>
-                  {accounts.map(account => (
+                  {accounts
+                    .filter(account => account.id !== fromAccount)
+                    .map(account => (
                     <option key={account.id} value={account.id}>
                       {getAccountDisplay(account)}
                     </option>

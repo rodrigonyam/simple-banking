@@ -3,7 +3,7 @@ import { useAuth } from '../App'
 import { PlusCircle, DollarSign, AlertCircle, CheckCircle, CreditCard } from 'lucide-react'
 
 function Deposit() {
-  const { user } = useAuth()
+  const { user, deposit } = useAuth()
   const [selectedAccount, setSelectedAccount] = useState('')
   const [amount, setAmount] = useState('')
   const [description, setDescription] = useState('')
@@ -13,7 +13,7 @@ function Deposit() {
 
   const accounts = user?.accounts || []
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault()
     setError('')
     setSuccess(false)
@@ -41,6 +41,7 @@ function Deposit() {
 
     // Simulate deposit processing
     setTimeout(() => {
+      deposit(selectedAccount, depositAmount, description)
       setSuccess(true)
       setIsLoading(false)
       

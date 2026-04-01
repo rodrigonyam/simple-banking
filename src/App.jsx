@@ -19,12 +19,14 @@ export const useAuth = () => {
   return context
 }
 
+// Demo credentials — never store real credentials in client-side code
+const DEMO_CREDENTIALS = { accountNumber: '1234567890', pin: '1234' }
+
 // Mock user data
 const mockUser = {
   id: 1,
   name: 'John Doe',
   accountNumber: '1234567890',
-  pin: '1234',
   accounts: [
     {
       id: 'acc1',
@@ -88,13 +90,80 @@ function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
 
   const login = (accountNumber, pin) => {
-    // PIN-based authentication
-    if (accountNumber === '1234567890' && pin === '1234') {
+    if (accountNumber === DEMO_CREDENTIALS.accountNumber && pin === DEMO_CREDENTIALS.pin) {
       setUser(mockUser)
       setIsAuthenticated(true)
       return { success: true }
     }
     return { success: false, error: 'Invalid account number or PIN' }
+  }
+
+  const deposit = (accountId, amount, description) => {
+    setUser(prev => {
+      const updatedAccounts = prev.accounts.map(acc =>
+        acc.id === accountId ? { ...acc, balance: acc.balance + amount } : acc
+      )
+      const accountType = prev.accounts.find(acc => acc.id === accountId)?.type
+      const newTransaction = {
+        id: Date.now(),
+        date: new Date().toISOString().split('T')[0],
+        description: description || 'Deposit',
+        amount,
+        type: 'credit',
+        account: accountType
+      }
+      return { ...prev, accounts: updatedAccounts, transactions: [newTransaction, ...prev.transactions] }
+    })
+  }
+
+  const withdraw = (accountId, amount, description) => {
+    setUser(prev => {
+      const updatedAccounts = prev.accounts.map(acc =>
+        acc.id === accountId ? { ...acc, balance: acc.balance - amount } : acc
+      )
+      const accountType = prev.accounts.find(acc => acc.id === accountId)?.type
+      const newTransaction = {
+        id: Date.now(),
+        date: new Date().toISOString().split('T')[0],
+        description: description || 'Withdrawal',
+        amount: -amount,
+        type: 'debit',
+        account: accountType
+      }
+      return { ...prev, accounts: updatedAccounts, transactions: [newTransaction, ...prev.transactions] }
+    })
+  }
+
+  const transfer = (fromAccountId, toAccountId, amount, description) => {
+    setUser(prev => {
+      const fromType = prev.accounts.find(acc => acc.id === fromAccountId)?.type
+      const toType = prev.accounts.find(acc => acc.id === toAccountId)?.type
+      const updatedAccounts = prev.accounts.map(acc => {
+        if (acc.id === fromAccountId) return { ...acc, balance: acc.balance - amount }
+        if (acc.id === toAccountId) return { ...acc, balance: acc.balance + amount }
+        return acc
+      })
+      const newTransactions = [
+        {
+          id: Date.now(),
+          date: new Date().toISOString().split('T')[0],
+          description: description || `Transfer to ${toType}`,
+          amount: -amount,
+          type: 'transfer',
+          account: fromType
+        },
+        {
+          id: Date.now() + 1,
+          date: new Date().toISOString().split('T')[0],
+          description: description || `Transfer from ${fromType}`,
+          amount,
+          type: 'transfer',
+          account: toType
+        },
+        ...prev.transactions
+      ]
+      return { ...prev, accounts: updatedAccounts, transactions: newTransactions }
+    })
   }
 
   const logout = () => {
@@ -106,7 +175,10 @@ function AuthProvider({ children }) {
     user,
     isAuthenticated,
     login,
-    logout
+    logout,
+    deposit,
+    withdraw,
+    transfer
   }
 
   return (
