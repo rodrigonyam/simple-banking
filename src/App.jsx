@@ -1,6 +1,8 @@
 import React, { useState, useContext, createContext } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import Header from './components/Header'
+import SessionTimeout from './components/SessionTimeout'
+import { ToastProvider } from './components/Toast'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Transactions from './pages/Transactions'
@@ -195,12 +197,14 @@ function ProtectedRoute({ children }) {
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <div className="App">
-          <Header />
-          <main className="container">
-            <Routes>
+    <ToastProvider>
+      <AuthProvider>
+        <Router>
+          <div className="App">
+            <Header />
+            <SessionTimeout />
+            <main className="container">
+              <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/dashboard" element={
                 <ProtectedRoute>
@@ -227,12 +231,13 @@ function App() {
                   <Withdrawal />
                 </ProtectedRoute>
               } />
-              <Route path="/" element={<Navigate to="/dashboard" />} />
-            </Routes>
-          </main>
-        </div>
-      </Router>
-    </AuthProvider>
+                <Route path="/" element={<Navigate to="/dashboard" />} />
+              </Routes>
+            </main>
+          </div>
+        </Router>
+      </AuthProvider>
+    </ToastProvider>
   )
 }
 

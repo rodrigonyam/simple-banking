@@ -1,13 +1,14 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../App'
-import { Lock, CreditCard, AlertCircle, Hash } from 'lucide-react'
+import { Lock, CreditCard, AlertCircle, Hash, Eye, EyeOff } from 'lucide-react'
 
 function Login() {
   const [accountNumber, setAccountNumber] = useState('')
   const [pin, setPin] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [showPin, setShowPin] = useState(false)
 
   const { login } = useAuth()
   const navigate = useNavigate()
@@ -139,17 +140,27 @@ function Login() {
                     <Hash size={18} className="inline mr-2 text-purple-600" />
                     PIN
                   </label>
-                  <input
-                    id="pin"
-                    type="password"
-                    className="form-input border-2 border-gray-200 focus:border-purple-500 focus:ring-4 focus:ring-purple-100 rounded-xl transition-all duration-200"
-                    placeholder="Enter your 4-digit PIN"
-                    value={pin}
-                    onChange={(e) => setPin(e.target.value)}
-                    required
-                    maxLength="4"
-                    pattern="[0-9]{4}"
-                  />
+                  <div className="relative">
+                    <input
+                      id="pin"
+                      type={showPin ? 'text' : 'password'}
+                      className="form-input border-2 border-gray-200 focus:border-purple-500 focus:ring-4 focus:ring-purple-100 rounded-xl transition-all duration-200 pr-10"
+                      placeholder="Enter your 4-digit PIN"
+                      value={pin}
+                      onChange={(e) => setPin(e.target.value)}
+                      required
+                      maxLength="4"
+                      pattern="[0-9]{4}"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPin(v => !v)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                      aria-label={showPin ? 'Hide PIN' : 'Show PIN'}
+                    >
+                      {showPin ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
                 </div>
 
                 <button
